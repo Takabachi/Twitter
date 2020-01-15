@@ -13,15 +13,17 @@ class TweetsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Tweet $tweet)
+
+    // 一覧表示 追加
+    public function index(Tweet $tweets)
     {
         //
-        
-        $timelines = $tweet->getTimelines($user->id);
+        $user = auth()->user(); //追加
+        $tweets = Tweet::orderBy('created_at', 'desc')->get(); //追加
 
         return view('tweets.index',[
-            'user'      => $user,
-            'timelines' => $timelines
+            'user'  => $user,
+            'tweets' => $tweets
         ]);
     }
 
@@ -30,6 +32,8 @@ class TweetsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    // 新規ツイート入力画面 追加
     public function create()
     {
         //
@@ -46,6 +50,8 @@ class TweetsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+     // 新規ツイート投稿処理 追加
     public function store(Request $request, Tweet $tweet)
     {
         //
@@ -67,17 +73,17 @@ class TweetsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Tweet $tweet, Comment $comment)
+
+    // ツイート詳細画面 追加
+    public function show(Tweet $tweet, $user_id)
     {
         //
         $user = auth()->user();
-        $tweet = $tweet->getTweet($tweet->id);
-        $comments = $comment->getComments($tweet->id);
+        $tweet = Tweet::findOrFail($user_id);
 
         return view('tweets.show', [
             'user'     => $user,
             'tweet'    => $tweet,
-            'comments' => $comments
         ]);
     }
 
@@ -87,14 +93,12 @@ class TweetsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tweet $tweet)
+
+    // ツイート編集画面 追加
+    public function edit(Tweet $tweet, $user_id)
     {
         $user = auth()->user();
-        $tweets = $tweet->getEditTweet($user->id, $tweet->id);
-
-        if (!isset($tweets)) {
-            return redirect('tweets');
-        }
+        $tweets = Tweet::findOrFail($user_id);
 
         return view('tweets.edit', [
             'user'   => $user,
@@ -109,17 +113,20 @@ class TweetsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tweet $tweet)
+
+    // ツイート編集処理 追加
+    public function update(Request $request, $user_id)
     {
         $data = $request->all();
         $validator = Validator::make($data, [
             'text' => ['required', 'string', 'max:140']
         ]);
 
-        $validator->validate();
-        $tweet->tweetUpdate($tweet->id, $data);
+        $tweets = Tweet::findOrFail($user_id);
 
-        return redirect('tweets');
+        $tweets->fill($validator)->validate()->save();
+
+        return redirect()->route('tweets.show', ['tweet' => $tweet]);
     }
 
     /**
@@ -128,7 +135,9 @@ class TweetsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tweet $tweet)
+
+    // ツイート削除処理 追加
+    public function destroy(Tweet $tweet, $id)
     {
         $user = auth()->user();
         $tweet->tweetDestroy($user->id, $tweet->id);

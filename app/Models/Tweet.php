@@ -21,7 +21,7 @@ class Tweet extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class); //Tweetはどこか一つのUserに属している 追加 
     }
 
     // フォローしているユーザのIDを取得
@@ -42,15 +42,6 @@ class Tweet extends Model
     public function getEditTweet(Int $user_id, Int $tweet_id)
     {
         return $this->where('user_id', $user_id)->where('id', $tweet_id)->first();
-    }
-
-    public function tweetUpdate(Int $tweet_id, Array $data)
-    {
-        $this->id = $tweet_id;
-        $this->text = $data['text'];
-        $this->update();
-
-        return;
     }
 
     public function tweetDestroy(Int $user_id, Int $tweet_id)

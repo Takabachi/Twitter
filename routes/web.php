@@ -19,6 +19,12 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('/tweets/create', 'TweetsController@create');
+
+Route::get('/tweets/{id}', 'TweetsController@show');
+
+Route::get('/tweets/{id}/edit', 'TweetsController@edit');
+
 //ログイン状態
 Route::group(['middleware' => 'auth'], function() {
 
